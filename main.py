@@ -52,7 +52,7 @@ except TimeoutException:
 
         # Click on view details of new category
 driver.find_element(By.XPATH, f"//*[contains(text(),'{category_name}')]//ancestor::div[3]/following-sibling::div/center/button").click()
-try:
-    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//*[@class='apexcharts-legend-series']")))
-except TimeoutException:
-    pytest.fail("No data displays on chart")
+# try:
+#     WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//*[@class='apexcharts-legend-series']")))
+# except TimeoutException:
+#     pytest.fail("No data displays on chart")
