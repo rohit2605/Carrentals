@@ -3,6 +3,7 @@ import time
 from selenium import webdriver
 import pytest
 from selenium.common import TimeoutException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -160,9 +161,9 @@ class TestCarRentals():
         modal_element.click()
 
         # All competitors selected
-        competitors = self.driver.find_elements(By.XPATH, "//div[@class='grid-my-cate']/div[2]/div/div[2]/div")
+        competitors = self.driver.find_elements(By.XPATH, "//div[@class='grid-my-cate']/following-sibling::div/div/div/table/tbody/tr[1]/td")
         for i in range(1,len(competitors)):
-            self.driver.find_element(By.XPATH, f"//div[@class='grid-my-cate']/div[2]/div/div[2]/div[{i}]/button").click()
+            self.driver.find_element(By.XPATH, f"//div[@class='grid-my-cate']/following-sibling::div/div/div/table/tbody/tr[1]/td[{i}]").click()
         self.driver.find_element(By.XPATH, " //div[@class='grid-my-cate']/ancestor::div[2]/following-sibling::div/button").click()
         WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div[3]/div/button"))).click()
         self.driver.find_element(By.XPATH,"//div[@class='grid-my-cate']/ancestor::div[2]/div[1]/h2/button").click()
@@ -175,10 +176,17 @@ class TestCarRentals():
 
         # Click on view details of new category
         self.driver.find_element(By.XPATH, f"//*[contains(text(),'{category_name}')]//ancestor::div[3]/following-sibling::div/center/button").click()
+        competitor_list = WebDriverWait(self.driver, 20).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@class='lor-filter']/following-sibling::div/button")))
+        competitor_list.click()
+        # self.driver.find_element(By.XPATH, "//*[@class='lor-filter']/following-sibling::div/button").click()
         try:
-            WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//*[@class='apexcharts-legend-series']")))
+            WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//*[@class='cars-list-box']/div[1]")))
         except TimeoutException:
             pytest.fail("No data displays on chart")
+
+        # Click on cross button
+        self.driver.find_element(By.XPATH, "//*[@class='cars-list-box']/preceding-sibling::div[2]/h3").click()
 
         # Back to list page using breadcrumbs
         self.driver.find_element(By.XPATH, "//div[@class= 'desk-breadcrumbs']/div/nav/ol/li[5]").click()
@@ -187,3 +195,24 @@ class TestCarRentals():
         setup_element_1 = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, "//button[contains(text(),'Setup')]")))
         setup_element_1.click()
+
+        # #Delete the category
+        # WebDriverWait(self.driver, 10).until(
+        #     EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'Test Category')]/ancestor::div[1]/*[local-name()='svg'][2]"))).click()
+        # time.sleep(8)
+
+    # def test_market_alert(self,setup):
+    #     # Login
+    #     self.driver.find_element(By.XPATH, "//input[@name='username']").send_keys("ezrental")
+    #     self.driver.find_element(By.XPATH, "//input[@name='password']").send_keys("ezrental")
+    #     self.driver.find_element(By.XPATH, "//button[@type='submit']").click()
+    #     self.driver.implicitly_wait(10)
+    #     rows = self.driver.find_elements(By.XPATH,"//table/tbody/tr")
+    #     self.driver.find_element(By.XPATH,f"//table/tbody/tr[{len(rows)-1}]/td[2]/a").click()
+    #     time.sleep(5)
+    #
+    #      # Setup Category
+    #     market_element = WebDriverWait(self.driver, 10).until(
+    #     EC.visibility_of_element_located((By.XPATH, "//*[@id='root']/div/div/div[1]/div/div/ul/li[4]/div/div[2]/span")))
+    #     market_element.click()
+    #     time.sleep(6)
