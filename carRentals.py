@@ -1,4 +1,5 @@
 import time
+import random
 
 from selenium import webdriver
 import pytest
@@ -7,6 +8,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -132,6 +134,7 @@ class TestCarRentals():
         self.driver.find_element(By.XPATH, "//*[@class='textleft']/button").click()
         self.driver.implicitly_wait(3)
 
+
     def test_categories(self,setup):
         # Login
         self.driver.find_element(By.XPATH, "//input[@name='username']").send_keys("ezrental")
@@ -161,12 +164,15 @@ class TestCarRentals():
         modal_element.click()
 
         # All competitors selected
-        competitors = self.driver.find_elements(By.XPATH, "//div[@class='grid-my-cate']/following-sibling::div/div/div/table/tbody/tr[1]/td")
-        for i in range(1,len(competitors)):
-            self.driver.find_element(By.XPATH, f"//div[@class='grid-my-cate']/following-sibling::div/div/div/table/tbody/tr[1]/td[{i}]").click()
-        self.driver.find_element(By.XPATH, " //div[@class='grid-my-cate']/ancestor::div[2]/following-sibling::div/button").click()
-        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div[3]/div/button"))).click()
-        self.driver.find_element(By.XPATH,"//div[@class='grid-my-cate']/ancestor::div[2]/div[1]/h2/button").click()
+        competitors = self.driver.find_elements(By.XPATH, "//div[@class='grid-my-cate']/div[2]/div/div[2]/div")
+        for i in range(1, len(competitors)):
+            self.driver.find_element(By.XPATH,
+                                     f"//div[@class='grid-my-cate']/div[2]/div/div[2]/div[{i}]/button").click()
+        self.driver.find_element(By.XPATH,
+                                 " //div[@class='grid-my-cate']/ancestor::div[2]/following-sibling::div/button").click()
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div[3]/div/button"))).click()
+        self.driver.find_element(By.XPATH, "//div[@class='grid-my-cate']/ancestor::div[2]/div[1]/h2/button").click()
 
         # Validate Category is created or not
         try:
@@ -181,9 +187,14 @@ class TestCarRentals():
         competitor_list.click()
         # self.driver.find_element(By.XPATH, "//*[@class='lor-filter']/following-sibling::div/button").click()
         try:
-            WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//*[@class='cars-list-box']/div[1]")))
+            WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//*[@class='cars-list-box']")))
+            total_competitors = self.driver.find_elements(By.XPATH, "//*[@class='cars-list-box']/div")
+
+            # Check the length of the competitor elements and assert
+            assert len(total_competitors) > 0, "No competitors found"
+
         except TimeoutException:
-            pytest.fail("No data displays on chart")
+            pytest.fail("No competitors found")
 
         # Click on cross button
         self.driver.find_element(By.XPATH, "//*[@class='cars-list-box']/preceding-sibling::div[2]/h3").click()
@@ -191,28 +202,91 @@ class TestCarRentals():
         # Back to list page using breadcrumbs
         self.driver.find_element(By.XPATH, "//div[@class= 'desk-breadcrumbs']/div/nav/ol/li[5]").click()
 
-        # Click on Setup Category again
-        setup_element_1 = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "//button[contains(text(),'Setup')]")))
-        setup_element_1.click()
+        # # Click on Setup Category again
+        # setup_element_1 = WebDriverWait(self.driver, 10).until(
+        #     EC.visibility_of_element_located((By.XPATH, "//button[contains(text(),'Setup')]")))
+        # setup_element_1.click()
 
         # #Delete the category
         # WebDriverWait(self.driver, 10).until(
         #     EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'Test Category')]/ancestor::div[1]/*[local-name()='svg'][2]"))).click()
         # time.sleep(8)
 
-    # def test_market_alert(self,setup):
-    #     # Login
-    #     self.driver.find_element(By.XPATH, "//input[@name='username']").send_keys("ezrental")
-    #     self.driver.find_element(By.XPATH, "//input[@name='password']").send_keys("ezrental")
-    #     self.driver.find_element(By.XPATH, "//button[@type='submit']").click()
-    #     self.driver.implicitly_wait(10)
-    #     rows = self.driver.find_elements(By.XPATH,"//table/tbody/tr")
-    #     self.driver.find_element(By.XPATH,f"//table/tbody/tr[{len(rows)-1}]/td[2]/a").click()
-    #     time.sleep(5)
-    #
-    #      # Setup Category
-    #     market_element = WebDriverWait(self.driver, 10).until(
-    #     EC.visibility_of_element_located((By.XPATH, "//*[@id='root']/div/div/div[1]/div/div/ul/li[4]/div/div[2]/span")))
-    #     market_element.click()
-    #     time.sleep(6)
+    @pytest.mark.sanity
+    def test_market_alert(self,setup):
+        # Login
+        self.driver.find_element(By.XPATH, "//input[@name='username']").send_keys("ezrental")
+        self.driver.find_element(By.XPATH, "//input[@name='password']").send_keys("ezrental")
+        self.driver.find_element(By.XPATH, "//button[@type='submit']").click()
+        self.driver.implicitly_wait(10)
+        rows = self.driver.find_elements(By.XPATH,"//table/tbody/tr")
+        self.driver.find_element(By.XPATH,f"//table/tbody/tr[{len(rows)-1}]/td[2]/a").click()
+        time.sleep(15)
+
+         # Select Market Alerts
+        market_element = WebDriverWait(self.driver, 10).until(
+        EC.visibility_of_element_located((By.XPATH, "//*[@id='root']/div/div/div[1]/div/div/ul/li[4]/div/div[2]/span")))
+        market_element.click()
+
+        # Click on Create Alert Button
+        self.driver.find_element(By.XPATH, "//*[@placeholder='Search by alert name']/ancestor::div[1]/button").click()
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(
+                (By.XPATH, "//*[@class='stepper-one']/following-sibling::div/button[2]"))).click()
+
+        # Dropdown select
+        dropdown = Select(self.driver.find_element(By.NAME, "marketcategorieslabel"))
+        dropdown.select_by_visible_text("Test Category")
+        self.driver.find_element(By.XPATH, "//*[@class='stepper-two']/following-sibling::div/button[2]").click()
+        self.driver.implicitly_wait(6)
+
+        initial_options = [option.text for option in Select(self.driver.find_element(By.NAME, "alertme")).options]
+        for option_text in initial_options:
+            dropdown_category = Select(self.driver.find_element(By.NAME, "alertme"))
+            dropdown_category.select_by_visible_text(option_text)
+            time.sleep(3)
+            dropdown_pricetype = Select(self.driver.find_element(By.NAME, "pricetype"))
+            dropdown_pricetype.select_by_visible_text("is less than")
+            time.sleep(3)
+            self.driver.find_element(By.XPATH, "//*[@name='price']").send_keys("11")
+            time.sleep(3)
+            dropdown_lor = Select(self.driver.find_element(By.NAME, "lor"))
+            dropdown_lor.select_by_visible_text("1 day")
+            time.sleep(3)
+            dropdown_days = Select(self.driver.find_element(By.NAME, "horizon"))
+            dropdown_days.select_by_value("30")
+
+            # Click on Next button for 3rd step
+            self.driver.find_element(By.XPATH, "//*[@class='stepper-three']/following-sibling::div/button[2]").click()
+            time.sleep(3)
+            new_name = "test" + str(random.randint(0, 1000))
+            self.driver.find_element(By.XPATH, "//*[@placeholder='Enter the alert name']").send_keys(new_name)
+            time.sleep(2)
+            self.driver.find_element(By.XPATH, "//*[@name='emailone']").send_keys("xyz@yopmail.com")
+            time.sleep(2)
+            self.driver.find_element(By.XPATH, "//*[@class='stepper-four']/following-sibling::div/button[2]").click()
+            time.sleep(2)
+
+            # Alert handle
+            self.driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div/button").click()
+
+            # Assert
+            total_rows = self.driver.find_elements(By.XPATH, "//*[contains(text(),'Alert Type')]/ancestor::div[1]/table/tbody/tr")
+            alertnames = []
+            for i in range(len(total_rows)):
+                    single_alertname = self.driver.find_element(By.XPATH, f"//*[contains(text(),'Alert Type')]/ancestor::div[1]/table/tbody/tr[{i+1}]/td[2]").text
+                    alertnames.append(single_alertname)
+            assert new_name in alertnames, f"Required value {new_name} is not created"
+
+            # Click on create alert again
+            self.driver.find_element(By.XPATH, "//*[@placeholder='Search by alert name']/ancestor::div[1]/button").click()
+            time.sleep(2)
+            WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located(
+                    (By.XPATH, "//*[@class='stepper-one']/following-sibling::div/button[2]"))).click()
+
+            # Dropdown select
+            dropdown = Select(self.driver.find_element(By.NAME, "marketcategorieslabel"))
+            dropdown.select_by_visible_text("Test Category")
+            self.driver.find_element(By.XPATH, "//*[@class='stepper-two']/following-sibling::div/button[2]").click()
+            time.sleep(3)

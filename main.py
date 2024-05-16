@@ -1,9 +1,13 @@
+import random
+import time
+
 import pytest
 from selenium import webdriver
 from selenium.common import TimeoutException
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -17,42 +21,60 @@ driver.find_element(By.XPATH, "//button[@type='submit']").click()
 driver.implicitly_wait(10)
 rows = driver.find_elements(By.XPATH,"//table/tbody/tr")
 driver.find_element(By.XPATH,f"//table/tbody/tr[{len(rows)-1}]/td[2]/a").click()
+time.sleep(15)
 
-        # Setup Category
-setup_element = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, "//button[contains(text(),'Setup')]")))
-setup_element.click()
+market_element = WebDriverWait(driver, 10).until(
+    EC.visibility_of_element_located((By.XPATH, "//*[@id='root']/div/div/div[1]/div/div/ul/li[4]/div/div[2]/span")))
+market_element.click()
+driver.find_element(By.XPATH, "//*[@placeholder='Search by alert name']/ancestor::div[1]/button").click()
+WebDriverWait(driver, 10).until(
+    EC.visibility_of_element_located(
+        (By.XPATH, "//*[@class='stepper-one']/following-sibling::div/button[2]"))).click()
 
-        # Add New Category
-driver.find_element(By.XPATH,"//button[contains(text(),'Add New')]").click()
-category_name = "Test Category"
-categoryName_element = WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'Category Name')]/ancestor::label/following-sibling::div/input")))
-categoryName_element.send_keys(category_name)
-driver.find_element(By.XPATH, "//*[contains(text(),'Category Name')]/ancestor::div[1]/following-sibling::div/button[@type='submit']").click()
+# Dropdown select
+dropdown = Select(driver.find_element(By.NAME, "marketcategorieslabel"))
+dropdown.select_by_visible_text("Test Category")
+driver.find_element(By.XPATH, "//*[@class='stepper-two']/following-sibling::div/button[2]").click()
+time.sleep(10)
 
-        # Category Created
-modal_element = WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located(
-                (By.XPATH, "//*[contains(text(),'Category Info')]/ancestor::div[1]/following-sibling::div/button")))
-modal_element.click()
 
-        # All competitors selected
-competitors = driver.find_elements(By.XPATH, "//div[@class='grid-my-cate']/div[2]/div/div[2]/div")
-for i in range(1,len(competitors)):
-    driver.find_element(By.XPATH, f"//div[@class='grid-my-cate']/div[2]/div/div[2]/div[{i}]/button").click()
-driver.find_element(By.XPATH, " //div[@class='grid-my-cate']/ancestor::div[2]/following-sibling::div/button").click()
-WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div[3]/div/button"))).click()
-driver.find_element(By.XPATH,"//div[@class='grid-my-cate']/ancestor::div[2]/div[1]/h2/button").click()
+# New experiment
+dropdown_category = Select(driver.find_element(By.NAME, "alertme"))
+dropdown_pricetype = Select(driver.find_element(By.NAME, "pricetype"))
+dropdown_lor = Select(driver.find_element(By.NAME, "lor"))
+dropdown_days = Select(driver.find_element(By.NAME, "horizon"))
 
-        # Validate Category is created or not
-try:
-    assert WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, f"//*[contains(text(),'{category_name}')]")))
-except TimeoutException:
-    pytest.fail(f"Category '{category_name}' is not created")
+for cat in dropdown_category.options:
+    dropdown_category.select_by_visible_text(cat.text)
+    time.sleep(5)
+    for prc in dropdown_pricetype.options:
+        dropdown_pricetype.select_by_visible_text(prc.text)
+        time.sleep(5)
+        driver.find_element(By.XPATH, "//*[@name='price']").send_keys("11")
+        time.sleep(5)
+        for lo in dropdown_lor.options[1:]:
+            dropdown_lor.select_by_visible_text(lo.text)
+            time.sleep(5)
+            for da in dropdown_days.options:
+                dropdown_days.select_by_visible_text(da.text)
+                time.sleep(5)
+                driver.find_element(By.XPATH, "//*[@class='stepper-three']/following-sibling::div/button[2]").click()
 
-        # Click on view details of new category
-driver.find_element(By.XPATH, f"//*[contains(text(),'{category_name}')]//ancestor::div[3]/following-sibling::div/center/button").click()
-try:
-    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//*[@class='apexcharts-legend-series']")))
-except TimeoutException:
-    pytest.fail("No data displays on chart")
+                driver.find_element(By.XPATH, "//*[@placeholder='Enter the alert name']").send_keys("test"+str(random.randint(0, 1000)))
+                time.sleep(2)
+                driver.find_element(By.XPATH, "//*[@name='emailone']").send_keys("xyz@yopmail.com")
+                time.sleep(2)
+                driver.find_element(By.XPATH, "//*[@class='stepper-four']/following-sibling::div/button[2]").click()
+                time.sleep(2)
+                driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div/button").click()
+                driver.find_element(By.XPATH, "//*[@placeholder='Search by alert name']/ancestor::div[1]/button").click()
+                time.sleep(2)
+                WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located(
+                        (By.XPATH, "//*[@class='stepper-one']/following-sibling::div/button[2]"))).click()
+
+                # Dropdown select
+                dropdown = Select(driver.find_element(By.NAME, "marketcategorieslabel"))
+                dropdown.select_by_visible_text("Test Category")
+                driver.find_element(By.XPATH, "//*[@class='stepper-two']/following-sibling::div/button[2]").click()
+                time.sleep(6)
