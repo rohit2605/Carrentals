@@ -134,7 +134,7 @@ class TestCarRentals():
         self.driver.find_element(By.XPATH, "//*[@class='textleft']/button").click()
         self.driver.implicitly_wait(3)
 
-
+    @pytest.mark.sanity
     def test_categories(self,setup):
         # Login
         self.driver.find_element(By.XPATH, "//input[@name='username']").send_keys("ezrental")
@@ -165,9 +165,9 @@ class TestCarRentals():
 
         # All competitors selected
         competitors = self.driver.find_elements(By.XPATH, "//div[@class='grid-my-cate']/div[2]/div/div[2]/div")
-        for i in range(1, len(competitors)):
+        for i in range(len(competitors)):
             self.driver.find_element(By.XPATH,
-                                     f"//div[@class='grid-my-cate']/div[2]/div/div[2]/div[{i}]/button").click()
+                                     f"//div[@class='grid-my-cate']/div[2]/div/div[2]/div[{i+1}]/button").click()
         self.driver.find_element(By.XPATH,
                                  " //div[@class='grid-my-cate']/ancestor::div[2]/following-sibling::div/button").click()
         WebDriverWait(self.driver, 10).until(
@@ -182,12 +182,12 @@ class TestCarRentals():
 
         # Click on view details of new category
         self.driver.find_element(By.XPATH, f"//*[contains(text(),'{category_name}')]//ancestor::div[3]/following-sibling::div/center/button").click()
-        competitor_list = WebDriverWait(self.driver, 20).until(
+        competitor_list = WebDriverWait(self.driver, 30).until(
             EC.visibility_of_element_located((By.XPATH, "//*[@class='lor-filter']/following-sibling::div/button")))
         competitor_list.click()
         # self.driver.find_element(By.XPATH, "//*[@class='lor-filter']/following-sibling::div/button").click()
         try:
-            WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//*[@class='cars-list-box']")))
+            WebDriverWait(self.driver, 30).until(EC.visibility_of_element_located((By.XPATH, "//*[@class='cars-list-box']")))
             total_competitors = self.driver.find_elements(By.XPATH, "//*[@class='cars-list-box']/div")
 
             # Check the length of the competitor elements and assert
@@ -211,6 +211,7 @@ class TestCarRentals():
         # WebDriverWait(self.driver, 10).until(
         #     EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'Test Category')]/ancestor::div[1]/*[local-name()='svg'][2]"))).click()
         # time.sleep(8)
+
 
     def test_market_alert(self,setup):
         # Login
@@ -268,6 +269,7 @@ class TestCarRentals():
 
             # Alert handle
             self.driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div/button").click()
+            time.sleep(3)
 
             # Assert
             total_rows = self.driver.find_elements(By.XPATH, "//*[contains(text(),'Alert Type')]/ancestor::div[1]/table/tbody/tr")
@@ -290,7 +292,7 @@ class TestCarRentals():
             self.driver.find_element(By.XPATH, "//*[@class='stepper-two']/following-sibling::div/button[2]").click()
             time.sleep(3)
 
-    @pytest.mark.sanity
+
     def test_market_activity(self, setup):
         # Login
         self.driver.find_element(By.XPATH, "//input[@name='username']").send_keys("ezrental")
