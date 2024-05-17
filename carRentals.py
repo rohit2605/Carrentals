@@ -212,7 +212,6 @@ class TestCarRentals():
         #     EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'Test Category')]/ancestor::div[1]/*[local-name()='svg'][2]"))).click()
         # time.sleep(8)
 
-    @pytest.mark.sanity
     def test_market_alert(self,setup):
         # Login
         self.driver.find_element(By.XPATH, "//input[@name='username']").send_keys("ezrental")
@@ -290,3 +289,63 @@ class TestCarRentals():
             dropdown.select_by_visible_text("Test Category")
             self.driver.find_element(By.XPATH, "//*[@class='stepper-two']/following-sibling::div/button[2]").click()
             time.sleep(3)
+
+    @pytest.mark.sanity
+    def test_market_activity(self, setup):
+        # Login
+        self.driver.find_element(By.XPATH, "//input[@name='username']").send_keys("ezrental")
+        self.driver.find_element(By.XPATH, "//input[@name='password']").send_keys("ezrental")
+        self.driver.find_element(By.XPATH, "//button[@type='submit']").click()
+        self.driver.implicitly_wait(10)
+        rows = self.driver.find_elements(By.XPATH,"//table/tbody/tr")
+        self.driver.find_element(By.XPATH,f"//table/tbody/tr[{len(rows)-1}]/td[2]/a").click()
+        time.sleep(15)
+
+         # Select Activity Report
+        market_element = WebDriverWait(self.driver, 10).until(
+        EC.visibility_of_element_located((By.XPATH, "//*[@id='root']/div/div/div[1]/div/div/ul/li[5]/div/div[2]/span")))
+        market_element.click()
+        time.sleep(5)
+
+        # Click on Add New Report Button
+        self.driver.find_element(By.XPATH, "//*[@placeholder='Search by Report name']/ancestor::div[1]/button").click()
+
+        reportfreq_options = [option.get_attribute("value") for option in Select(self.driver.find_element(By.NAME, "reportFrequency")).options]
+        for option_value in reportfreq_options[1:]:
+            dropdown_reportfreq = Select(self.driver.find_element(By.NAME, "reportFrequency"))
+            dropdown_reportfreq.select_by_value(option_value)
+            time.sleep(3)
+
+            report_name = "report" + str(random.randint(0, 1000))
+            WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.XPATH, "//*[@name='reportName']"))).send_keys(report_name)
+            time.sleep(2)
+            dropdown_lorental = Select(self.driver.find_element(By.NAME, "lengthOfRental"))
+            dropdown_lorental.select_by_value("1")
+            time.sleep(2)
+            dropdown_horizon = Select(self.driver.find_element(By.NAME, "horizon"))
+            dropdown_horizon.select_by_value("30")
+            time.sleep(2)
+            total_categories = self.driver.find_elements(By.XPATH, "//*[@class='category-options']/li")
+            for i in range(len(total_categories)):
+                self.driver.find_element(By.XPATH, f"//*[@class='category-options']/li[{i+1}]").click()
+            self.driver.find_element(By.XPATH, "//*[@name='emailone']").send_keys("abc@yopmail.com")
+            time.sleep(2)
+            self.driver.find_element(By.XPATH, "//*[@name='emailone']/ancestor::div[4]/following-sibling::div/button[2]").click()
+            time.sleep(3)
+
+            # Alert handle
+            self.driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div/button").click()
+            time.sleep(3)
+
+            # Assert
+            total_activity_rows = self.driver.find_elements(By.XPATH, "//*[contains(text(),'Activity Reports')]/ancestor::div[1]/following-sibling::div/div/div/table/tbody/tr")
+            reportnames = []
+            for i in range(len(total_activity_rows)):
+                    single_activityname = self.driver.find_element(By.XPATH, f"//*[contains(text(),'Activity Reports')]/ancestor::div[1]/following-sibling::div/div/div/table/tbody/tr[{i+1}]/td[1]").text
+                    reportnames.append(single_activityname)
+            assert report_name in reportnames, f"Required value {report_name} is not created"
+
+            # Click on Add New Report Button
+            self.driver.find_element(By.XPATH, "//*[@placeholder='Search by Report name']/ancestor::div[1]/button").click()
+            time.sleep(2)
