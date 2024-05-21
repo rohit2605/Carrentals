@@ -24,14 +24,22 @@ driver.find_element(By.XPATH,f"//table/tbody/tr[{len(rows)-1}]/td[2]/a").click()
 time.sleep(15)
 
 market_element = WebDriverWait(driver, 10).until(
-    EC.visibility_of_element_located((By.XPATH, "//*[@id='root']/div/div/div[1]/div/div/ul/li[5]/div/div[2]/span")))
+    EC.visibility_of_element_located((By.XPATH, "//*[@id='root']/div/div/div[1]/div/div/ul/li[4]/div/div[2]/span")))
 market_element.click()
 time.sleep(5)
 
-driver.find_element(By.XPATH, "//*[@placeholder='Search by Report name']/ancestor::div[1]/button").click()
-time.sleep(3)
+# Click on Create Alert Button
+driver.find_element(By.XPATH, "//*[@placeholder='Search by alert name']/ancestor::div[1]/button").click()
+WebDriverWait(driver, 10).until(
+    EC.visibility_of_element_located(
+        (By.XPATH, "//*[@class='stepper-one']/following-sibling::div/button[2]"))).click()
 
+# Dropdown select
+dropdown_cat = Select(driver.find_element(By.XPATH, "//*[@class='stepper-two']/select"))
+for drp in dropdown_cat.options:
+    print(drp.text)
 
-reportfreq_options = Select(driver.find_element(By.NAME, "reportFrequency")).options
-for i in reportfreq_options[1:]:
-    print(i.get_attribute("value"))
+dropdown_lorental = Select(driver.find_element(By.XPATH, "//*[@class='stepper-two']/select"))
+dropdown_lorental.select_by_value("Test Category")
+
+time.sleep(6)

@@ -134,7 +134,6 @@ class TestCarRentals():
         self.driver.find_element(By.XPATH, "//*[@class='textleft']/button").click()
         self.driver.implicitly_wait(3)
 
-    @pytest.mark.sanity
     def test_categories(self,setup):
         # Login
         self.driver.find_element(By.XPATH, "//input[@name='username']").send_keys("ezrental")
@@ -212,7 +211,7 @@ class TestCarRentals():
         #     EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'Test Category')]/ancestor::div[1]/*[local-name()='svg'][2]"))).click()
         # time.sleep(8)
 
-
+    @pytest.mark.sanity
     def test_market_alert(self,setup):
         # Login
         self.driver.find_element(By.XPATH, "//input[@name='username']").send_keys("ezrental")
@@ -235,8 +234,10 @@ class TestCarRentals():
                 (By.XPATH, "//*[@class='stepper-one']/following-sibling::div/button[2]"))).click()
 
         # Dropdown select
-        dropdown = Select(self.driver.find_element(By.NAME, "marketcategorieslabel"))
-        dropdown.select_by_visible_text("Test Category")
+        dropdown_cat = Select(self.driver.find_element(By.XPATH, "//*[@class='stepper-two']/select"))
+        time.sleep(1)
+        dropdown_cat.select_by_value("Test Category")
+        time.sleep(1)
         self.driver.find_element(By.XPATH, "//*[@class='stepper-two']/following-sibling::div/button[2]").click()
         self.driver.implicitly_wait(6)
 
@@ -287,7 +288,7 @@ class TestCarRentals():
                     (By.XPATH, "//*[@class='stepper-one']/following-sibling::div/button[2]"))).click()
 
             # Dropdown select
-            dropdown = Select(self.driver.find_element(By.NAME, "marketcategorieslabel"))
+            dropdown = Select(self.driver.find_element(By.XPATH, "//*[@class='stepper-two']/select"))
             dropdown.select_by_visible_text("Test Category")
             self.driver.find_element(By.XPATH, "//*[@class='stepper-two']/following-sibling::div/button[2]").click()
             time.sleep(3)
